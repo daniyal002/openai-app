@@ -1,101 +1,112 @@
-import Image from "next/image";
+'use client'
+import { useState, useRef, useEffect } from 'react';
+import {marked} from 'marked'; // Импортируем библиотеку для конвертации Markdown в HTML
+import { RefreshCcw } from 'lucide-react';
 
-export default function Home() {
+export default function Chat() {
+  const [prompt, setPrompt] = useState('');
+  const [response, setResponse] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [messages, setMessages] = useState<{ role: string, content: string }[]>([]); // История сообщений
+  const messagesEndRef = useRef<HTMLDivElement | null>(null); // Ссылка на конец сообщения
+
+  useEffect(() => {
+    if (messagesEndRef.current) {
+      messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
+      setPrompt('');
+    }
+  }, [messages]);
+
+  const handleSubmit = async () => {
+    setLoading(true);
+
+    // Добавляем сообщение пользователя в историю
+    const userMessage = { role: 'user', content: prompt };
+    const newMessages = [...messages, userMessage];
+
+    try {
+      const res = await fetch('/api/openai', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ prompt, messages: newMessages }),
+      });
+
+      const data = await res.json();
+
+      if (res.ok) {
+        // Получаем ответ от модели
+        const botMessage = { role: 'assistant', content: data.choices[0].message.content };
+
+        // Преобразуем ответ из Markdown в HTML
+        const htmlResponse = marked(botMessage.content);
+
+        // Обновляем историю сообщений с преобразованным HTML
+        setMessages([...newMessages, { ...botMessage, content: htmlResponse as string }]);
+        setResponse(htmlResponse as string);
+      } else {
+        setResponse(data.error || 'Error occurred while fetching response.');
+      }
+    } catch (error) {
+      console.error(error);
+      setResponse('Network error occurred.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-8 row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-semibold">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li>Save and see your changes instantly.</li>
-        </ol>
+    <div className="p-5 font-sans flex flex-col h-full">
+      <h1 className="text-2xl font-bold mb-4">OpenAI Chat</h1>
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:min-w-44"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+      {/* История сообщений */}
+      <div className="flex-1 overflow-y-auto bg-gray-100 p-3 rounded-md border border-gray-300 max-h-[70vh]">
+        <div className="flex flex-col space-y-4">
+          {messages.map((message, index) => (
+            <div
+              key={index}
+              className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'} mb-2`}
+            >
+              <div
+                className={`p-3 rounded-md max-w-6xl ${
+                  message.role === 'user' ? 'bg-blue-500 text-white' : 'bg-cyan-800 text-white'
+                }`}
+              >
+                <strong>{message.role === 'user' ? 'Вы' : 'Бот'}:</strong>
+                {/* Используем dangerouslySetInnerHTML для рендеринга HTML */}
+                <div
+                  className="whitespace-pre-wrap"
+                  dangerouslySetInnerHTML={{ __html: message.content }}
+                />
+              </div>
+            </div>
+          ))}
+          <div ref={messagesEndRef} /> {/* Для прокрутки к последнему сообщению */}
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-6 flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
+      </div>
+
+      {/* Текстовое поле для ввода */}
+      <div className="mt-4">
+        <textarea
+          className="w-full p-2 border border-gray-300 rounded-md mb-4"
+          rows={5}
+          value={prompt}
+          onChange={(e) => setPrompt(e.target.value)}
+          placeholder="Введите свой запрос здесь..."
+        />
+        <button
+          className={`px-4 py-2 rounded-md text-white ${loading ? 'bg-gray-400' : 'bg-blue-500 hover:bg-blue-600'}`}
+          onClick={handleSubmit}
+          disabled={loading}
         >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
+          {loading ? (
+            <RefreshCcw className="animate-spin h-5 w-5" />
+          ) : (
+            'Отправить'
+          )}
+        </button>
+      </div>
     </div>
   );
 }
