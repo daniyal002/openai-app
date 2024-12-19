@@ -5,6 +5,7 @@
 :root {
   --background: #ffffff;
   --foreground: #171717;
+  --textcolor: #ffffff;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -13,9 +14,11 @@
     --foreground: #000000;
   }
 }
-
-body {
+input{
   color: var(--foreground);
+}
+body {
+  color: var(--textcolor);
   background: var(--background);
   font-family: Arial, Helvetica, sans-serif;
 }
