@@ -57,7 +57,7 @@ export default function Chat() {
 
   return (
     <div className="p-5 font-sans flex flex-col h-screen justify-between" style={{height:"100vh"}}>
-      <h1 className="text-2xl font-bold mb-4">OpenAI Chat</h1>
+      <h1 className="text-2xl font-bold mb-4">AI для запуска</h1>
 
       <div className="flex-1 overflow-y-auto bg-gray-100 p-3 rounded-md border border-gray-300 max-h-[70vh]">
         <div className="flex flex-col space-y-4">
@@ -88,7 +88,7 @@ export default function Chat() {
         </div>
       </div>
 
-      <div className="mt-4 flex flex-row w-full items-center space-x-4 sticky bottom-0 bg-white ">
+      <div className="mt-4 flex flex-row w-full items-center space-x-4  bottom-0 bg-white ">
         <textarea
           className="flex-grow p-2 border border-gray-300 rounded-md outline-none"
           rows={4}
