@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import axios from 'axios';
-import { knowledgeBase } from './helper';
+import { SYSTEM_PROMPT } from './helper';
 
 export async function POST(req: NextRequest) {
   const body = await req.json();
@@ -13,7 +13,7 @@ export async function POST(req: NextRequest) {
   try {
     const fullMessages = [
       ...messages,
-      ...knowledgeBase,
+      SYSTEM_PROMPT
     ];
 
     const response = await axios.post(
