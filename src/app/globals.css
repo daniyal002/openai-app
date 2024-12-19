@@ -16,6 +16,11 @@
 
   }
 }
+
+#boxMessage{
+  color: #000000;
+}
+
 textarea{
   color: var(--foreground);
 }

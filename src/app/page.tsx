@@ -59,7 +59,7 @@ export default function Chat() {
     <div className="p-5 font-sans flex flex-col justify-between" style={{height:"100%"}}>
       <h1 className="text-2xl font-bold mb-4">AI для запуска</h1>
 
-      <div className="flex-1 overflow-y-auto bg-gray-100 p-3 rounded-md border border-gray-300 max-h-[70vh]">
+      <div className="flex-1 overflow-y-auto bg-gray-100 p-3 rounded-md border border-gray-300 max-h-[70vh]" id='boxMessage'>
         <div className="flex flex-col space-y-4">
           {messages.map((message, index) => (
             <div
@@ -98,7 +98,7 @@ export default function Chat() {
         />
         <button
           className={`px-4 py-2 rounded-md text-white ${
-            loading ? "bg-gray-400" : "bg-black hover:bg-gray-500 transition-all delay-150"
+            loading ? "bg-gray-400" : "bg-[#252525] hover:bg-gray-500 transition-all delay-150"
           }`}
           onClick={handleSubmit}
           disabled={loading}
