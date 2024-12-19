@@ -1,14 +1,18 @@
-'use client'
+'use client';
 import { useState, useRef, useEffect } from 'react';
-import {marked} from 'marked'; // Импортируем библиотеку для конвертации Markdown в HTML
+import { marked } from 'marked';
 import { RefreshCcw } from 'lucide-react';
+
+interface IMessages{
+  role: string; content: string
+}
 
 export default function Chat() {
   const [prompt, setPrompt] = useState('');
-  const [response, setResponse] = useState('');
   const [loading, setLoading] = useState(false);
-  const [messages, setMessages] = useState<{ role: string, content: string }[]>([]); // История сообщений
-  const messagesEndRef = useRef<HTMLDivElement | null>(null); // Ссылка на конец сообщения
+  const [messages, setMessages] = useState<IMessages[]>([]);
+
+  const messagesEndRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     if (messagesEndRef.current) {
@@ -20,7 +24,6 @@ export default function Chat() {
   const handleSubmit = async () => {
     setLoading(true);
 
-    // Добавляем сообщение пользователя в историю
     const userMessage = { role: 'user', content: prompt };
     const newMessages = [...messages, userMessage];
 
@@ -36,21 +39,13 @@ export default function Chat() {
       const data = await res.json();
 
       if (res.ok) {
-        // Получаем ответ от модели
-        const botMessage = { role: 'assistant', content: data.choices[0].message.content };
-
-        // Преобразуем ответ из Markdown в HTML
-        const htmlResponse = marked(botMessage.content);
-
-        // Обновляем историю сообщений с преобразованным HTML
-        setMessages([...newMessages, { ...botMessage, content: htmlResponse as string }]);
-        setResponse(htmlResponse as string);
+        const botMessage = { role: 'assistant', content: marked(data.choices[0].message.content) };
+        setMessages([...newMessages as IMessages[], botMessage as IMessages]);
       } else {
-        setResponse(data.error || 'Error occurred while fetching response.');
+        console.error('Ошибка:', data.error || 'Ошибка при получении ответа.');
       }
     } catch (error) {
-      console.error(error);
-      setResponse('Network error occurred.');
+      console.error('Ошибка сети:', error);
     } finally {
       setLoading(false);
     }
@@ -60,7 +55,6 @@ export default function Chat() {
     <div className="p-5 font-sans flex flex-col h-full">
       <h1 className="text-2xl font-bold mb-4">OpenAI Chat</h1>
 
-      {/* История сообщений */}
       <div className="flex-1 overflow-y-auto bg-gray-100 p-3 rounded-md border border-gray-300 max-h-[70vh]">
         <div className="flex flex-col space-y-4">
           {messages.map((message, index) => (
@@ -73,8 +67,7 @@ export default function Chat() {
                   message.role === 'user' ? 'bg-blue-500 text-white' : 'bg-cyan-800 text-white'
                 }`}
               >
-                <strong>{message.role === 'user' ? 'Вы' : 'Бот'}:</strong>
-                {/* Используем dangerouslySetInnerHTML для рендеринга HTML */}
+                <strong>{message.role === 'user' ? 'You' : 'Bot'}:</strong>
                 <div
                   className="whitespace-pre-wrap"
                   dangerouslySetInnerHTML={{ __html: message.content }}
@@ -82,11 +75,10 @@ export default function Chat() {
               </div>
             </div>
           ))}
-          <div ref={messagesEndRef} /> {/* Для прокрутки к последнему сообщению */}
+          <div ref={messagesEndRef} />
         </div>
       </div>
 
-      {/* Текстовое поле для ввода */}
       <div className="mt-4">
         <textarea
           className="w-full p-2 border border-gray-300 rounded-md mb-4"
@@ -100,11 +92,7 @@ export default function Chat() {
           onClick={handleSubmit}
           disabled={loading}
         >
-          {loading ? (
-            <RefreshCcw className="animate-spin h-5 w-5" />
-          ) : (
-            'Отправить'
-          )}
+          {loading ? <RefreshCcw className="animate-spin h-5 w-5" /> : 'Отправить'}
         </button>
       </div>
     </div>
