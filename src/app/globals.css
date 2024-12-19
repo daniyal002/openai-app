@@ -5,16 +5,18 @@
 :root {
   --background: #ffffff;
   --foreground: #171717;
-  --textcolor: #ffffff;
+  --textcolor: #000000;
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
     --background: #252525;
     --foreground: #000000;
+    --textcolor: #ffffff;
+
   }
 }
-input{
+textarea{
   color: var(--foreground);
 }
 body {

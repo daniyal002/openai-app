@@ -88,7 +88,7 @@ export default function Chat() {
         </div>
       </div>
 
-      <div className="mt-4 flex flex-row w-full items-center space-x-4  bottom-0 bg-white ">
+      <div className="mt-4 flex flex-row w-full items-center space-x-4  bottom-0 bg-white rounded-md pr-2">
         <textarea
           className="flex-grow p-2 border border-gray-300 rounded-md outline-none"
           rows={4}
@@ -106,7 +106,7 @@ export default function Chat() {
           {loading ? (
             <RefreshCcw className="animate-spin h-5 w-5" />
           ) : (
-            <Forward />
+            <Forward/>
           )}
         </button>
       </div>
