@@ -1,7 +1,7 @@
 "use client";
 import { useState, useRef, useEffect } from "react";
 import { marked } from "marked";
-import { Forward, RefreshCcw } from "lucide-react";
+import { Forward, RefreshCcw, Calendar } from "lucide-react";
 
 interface IMessages {
   role: string;
@@ -22,7 +22,7 @@ export default function Chat() {
     }
   }, [messages]);
 
-  const handleSubmit = async () => {
+  const handleSubmit = async (type: string = 'chat') => {
     setLoading(true);
 
     const userMessage = { role: "user", content: prompt };
@@ -34,7 +34,7 @@ export default function Chat() {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ prompt, messages: newMessages }),
+        body: JSON.stringify({ prompt, messages: newMessages, type }),
       });
 
       const data = await res.json();
@@ -100,13 +100,26 @@ export default function Chat() {
           className={`px-4 py-2 rounded-md text-white ${
             loading ? "bg-gray-400" : "bg-[#252525] hover:bg-gray-500 transition-all delay-150"
           }`}
-          onClick={handleSubmit}
+          onClick={() => handleSubmit('chat')}
           disabled={loading}
         >
           {loading ? (
             <RefreshCcw className="animate-spin h-5 w-5" />
           ) : (
             <Forward/>
+          )}
+        </button>
+        <button
+          className={`px-4 py-2 rounded-md text-white ${
+            loading ? "bg-gray-400" : "bg-[#252525] hover:bg-gray-500 transition-all delay-150"
+          }`}
+          onClick={() => handleSubmit('daily-plan')}
+          disabled={loading}
+        >
+          {loading ? (
+            <RefreshCcw className="animate-spin h-5 w-5" />
+          ) : (
+            <Calendar/>
           )}
         </button>
       </div>
